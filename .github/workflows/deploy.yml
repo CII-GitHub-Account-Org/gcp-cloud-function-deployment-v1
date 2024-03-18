@@ -1,0 +1,30 @@
+name: Deploy to Google Cloud Functions
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@master
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }} # eas-cognitive-cc-gdc1000231537
+        service_account_key: ${{ secrets.GCP_SA_KEY }} 
+        export_default_credentials: true
+
+    - name: Deploy to Google Cloud Functions
+      run: |
+        gcloud functions deploy gcp-cloud-function-using-copilot --runtime nodejs18 --allow-unauthenticated --source ./functions
+
+    - name: Handle errors
+      if: ${{ failure() }}
+      run: |
+        echo "Deployment failed"
